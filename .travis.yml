@@ -1,0 +1,24 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t vanshik1/react-test -f ./client/Dockerfile.dev ./client/Dockerfile.dev
+
+script:
+  - docker run vanshik1/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t vanshik1/multi-client ./client
+  - docker build -t vanshik1/multi-nginx ./nginx
+  - docker build -t vanshik1/multi-server ./server
+  - docker build -t vanshik1/multi-worker ./worker
+  #login
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Push to docker hub
+  - docker push vanshik1/multi-client
+  - docker push vanshik1/multi-nginx
+  - docker push vanshik1/multi-server
+  - docker push vanshik1/multi-worker
+
+
